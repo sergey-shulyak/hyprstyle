@@ -170,11 +170,13 @@ generate_theme_from_image() {
         log_info "Palette saved as: $palette_name"
     fi
 
+    # Reload components
+    reload_components
+
     echo -e "\n${GREEN}✓ Theme generated successfully!${NC}"
     echo -e "\nNext steps:"
-    echo "  1. Reload Hyprland with: super+shift+r (or restart)"
-    echo "  2. Commit changes to git (optional)"
-    echo "  3. To restore this backup later: ./hyprstyle.sh --restore $backup_path"
+    echo "  1. Commit changes to git (optional)"
+    echo "  2. To restore this backup later: ./hyprstyle.sh --restore $backup_path"
     echo ""
 
     return 0
@@ -196,10 +198,13 @@ restore_from_backup() {
         return 1
     fi
 
+    # Reload components
+    reload_components
+
     print_header "Restore Complete"
     echo -e "${GREEN}✓ Configuration restored successfully!${NC}"
     echo -e "\nNext steps:"
-    echo "  1. Reload Hyprland with: super+shift+r (or restart)"
+    echo "  1. Your theme has been restored and components reloaded"
     echo ""
 
     return 0
@@ -240,10 +245,13 @@ apply_palette() {
         return 1
     fi
 
+    # Reload components
+    reload_components
+
     print_header "Palette Applied"
     echo -e "${GREEN}✓ Palette applied successfully!${NC}"
     echo -e "\nNext steps:"
-    echo "  1. Reload Hyprland with: super+shift+r (or restart)"
+    echo "  1. Your theme has been applied and components reloaded"
     echo ""
 
     return 0
@@ -255,6 +263,38 @@ list_all() {
 
     list_backups "$BACKUPS_DIR"
     list_palettes "$PALETTES_DIR"
+}
+
+# Reload all components after theme changes
+reload_components() {
+    print_header "Reloading Components"
+
+    # Reload Hyprland
+    if command -v hyprctl &>/dev/null; then
+        log_info "Reloading Hyprland..."
+        hyprctl reload 2>/dev/null || log_warn "Failed to reload Hyprland"
+    else
+        log_warn "hyprctl not found, skipping Hyprland reload"
+    fi
+
+    # Restart Waybar
+    if systemctl --user is-enabled waybar &>/dev/null; then
+        log_info "Restarting Waybar..."
+        systemctl --user restart waybar 2>/dev/null || log_warn "Failed to restart Waybar"
+    else
+        log_warn "Waybar not enabled, skipping restart"
+    fi
+
+    # Restart Mako
+    if systemctl --user is-enabled mako &>/dev/null; then
+        log_info "Restarting Mako..."
+        systemctl --user restart mako 2>/dev/null || log_warn "Failed to restart Mako"
+    else
+        log_warn "Mako not enabled, skipping restart"
+    fi
+
+    log_info "Component reload complete"
+    return 0
 }
 
 # Main script logic

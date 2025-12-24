@@ -83,8 +83,12 @@ This will:
 3. **Backup** your current configuration
 4. Update all application configs (Hyprland, Kitty, Mako, Waybar, Wofi)
 5. Set the image as your wallpaper (via hyprpaper, if available)
-6. Save the palette for future use
-7. Show the backup location for reference
+6. Automatically reload all components:
+   - Hyprland (via `hyprctl reload`)
+   - Waybar (via `systemctl --user restart waybar`)
+   - Mako (via `systemctl --user restart mako`)
+7. Save the palette for future use
+8. Show the backup location for reference
 
 ### Restore Previous Configuration
 
@@ -100,6 +104,7 @@ This will:
 3. Show what files will be restored
 4. Ask for confirmation
 5. Restore the selected backup
+6. Automatically reload Hyprland, Waybar, and Mako
 
 #### Method 2: Command-line
 
@@ -129,6 +134,8 @@ Apply a palette:
 ```bash
 ./hyprstyle.sh --apply-palette wallpaper
 ```
+
+The palette will be applied to all configs and components will be automatically reloaded.
 
 ### View Palette Details
 
