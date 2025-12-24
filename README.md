@@ -80,14 +80,34 @@ This will:
 
 ### Restore Previous Configuration
 
+#### Method 1: Interactive Script (Recommended)
+
+```bash
+./restore-backup.sh
+```
+
+This will:
+1. List all available backups
+2. Prompt you to select one
+3. Show what files will be restored
+4. Ask for confirmation
+5. Restore the selected backup
+
+#### Method 2: Command-line
+
+Restore a specific backup directly:
+```bash
+./restore-backup.sh 2025-12-25_143022
+```
+
+Or use the main script:
+```bash
+./hyprstyle.sh --restore 2025-12-25_143022
+```
+
 List available backups:
 ```bash
 ./hyprstyle.sh --list
-```
-
-Restore a specific backup:
-```bash
-./hyprstyle.sh --restore 2025-12-25_143022
 ```
 
 ### Apply Saved Palette
@@ -119,7 +139,8 @@ See the exact colors in a palette:
 
 ```
 ~/Developer/hyprstyle/
-├── hyprstyle.sh                    # Main executable
+├── hyprstyle.sh                    # Main executable for theme generation
+├── restore-backup.sh               # Interactive backup restoration script
 ├── lib/                            # Utility libraries
 │   ├── color-extraction.sh         # Color extraction from images
 │   ├── config-updater.sh           # Apply colors to configs
@@ -410,6 +431,12 @@ Part of your personal Arch Linux configuration backup system.
 **Quick Start:**
 ```bash
 cd ~/Developer/hyprstyle
+
+# Generate a new theme from an image
 ./hyprstyle.sh ~/Pictures/your-wallpaper.png
 # Reload Hyprland (Super+Shift+R)
+
+# Later, restore a previous theme:
+./restore-backup.sh
+# Select from list, confirm, done!
 ```
