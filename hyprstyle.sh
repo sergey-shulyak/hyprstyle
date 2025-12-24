@@ -158,6 +158,9 @@ generate_theme_from_image() {
         return 1
     fi
 
+    # Set wallpaper
+    set_wallpaper "$image_path"
+
     print_header "Theme Generation Complete"
     log_info "Colors exported to: $COLORS_ENV"
 

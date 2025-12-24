@@ -54,8 +54,19 @@ apply_template() {
 
     log_info "Applying template: $(basename "$template_file")"
 
-    # Use envsubst to replace placeholders
-    envsubst < "$template_file" > "$temp_file"
+    # Use sed for Hyprland templates (uses @@ format), envsubst for others (uses ${} format)
+    if [[ "$template_file" == *"hyprland"* ]]; then
+        # Use sed to replace @@VARNAME@@ with environment variable values
+        sed_cmd="cat \"$template_file\""
+        for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK; do
+            value=$(eval echo \$${var})
+            sed_cmd="$sed_cmd | sed \"s|@@${var}@@|${value}|g\""
+        done
+        eval "$sed_cmd" > "$temp_file"
+    else
+        # Use envsubst for ${VARNAME} format
+        envsubst < "$template_file" > "$temp_file"
+    fi
 
     if [ $? -ne 0 ]; then
         log_error "Failed to apply template: $template_file"
@@ -204,6 +215,43 @@ validate_color_format() {
         log_warn "File still contains template placeholders: $file"
         return 1
     fi
+
+    return 0
+}
+
+# Set wallpaper using hyprpaper
+set_wallpaper() {
+    local image_path="$1"
+
+    if [ ! -f "$image_path" ]; then
+        log_warn "Image file not found, skipping wallpaper: $image_path"
+        return 0
+    fi
+
+    # Check if hyprpaper is available
+    if ! command -v hyprctl &>/dev/null; then
+        log_warn "hyprctl not found, skipping wallpaper setting"
+        return 0
+    fi
+
+    log_info "Setting wallpaper with hyprpaper..."
+
+    # Get all monitors
+    local monitors=$(hyprctl monitors -j 2>/dev/null | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
+
+    if [ -z "$monitors" ]; then
+        log_warn "Could not detect monitors, skipping wallpaper"
+        return 0
+    fi
+
+    # Preload the image
+    hyprctl hyprpaper preload "$image_path" 2>/dev/null
+
+    # Set wallpaper for each monitor
+    while read -r monitor; do
+        hyprctl hyprpaper wallpaper "$monitor,$image_path" 2>/dev/null
+        log_info "Set wallpaper for $monitor"
+    done <<< "$monitors"
 
     return 0
 }

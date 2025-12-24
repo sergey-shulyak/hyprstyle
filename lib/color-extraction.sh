@@ -44,7 +44,7 @@ check_dependencies() {
     return 0
 }
 
-# Extract colors from image using pywal
+# Extract colors from image using ImageMagick
 extract_colors_from_image() {
     local image_path="$1"
 
@@ -55,11 +55,11 @@ extract_colors_from_image() {
 
     log_info "Extracting colors from: $image_path"
 
-    # Use wal to extract colors (generates ~/.config/wal/colorscheme.json)
-    wal -i "$image_path" -c -s -t 2>/dev/null
+    # Run pywal to generate colors (even if we don't use its JSON directly)
+    wal -i "$image_path" -n 2>/dev/null
 
     if [ $? -ne 0 ]; then
-        log_error "Failed to extract colors with pywal"
+        log_error "Failed to extract colors"
         return 1
     fi
 
@@ -163,66 +163,131 @@ create_colors_env() {
 
     log_info "Creating colors environment file: $colors_file"
 
-    # Extract colors from image
-    extract_colors_from_image "$image_path" || return 1
-
-    # Get base colors
-    local wal_file="$HOME/.config/wal/colorscheme.json"
-    local palette=$(python3 << 'PYTHON_EOF'
-import json
+    # Extract dominant colors from image using ImageMagick
+    # This doesn't depend on pywal's JSON output format
+    local temp_py=$(mktemp)
+    cat > "$temp_py" << 'PYTHON_SCRIPT'
+import subprocess
+import sys
 import os
+from collections import Counter
 
-wal_file = os.path.expanduser("~/.config/wal/colorscheme.json")
-with open(wal_file) as f:
-    data = json.load(f)
+try:
+    image_path = sys.argv[1] if len(sys.argv) > 1 else None
+    if not image_path:
+        print("Error: Image path required", file=sys.stderr)
+        sys.exit(1)
 
-colors = data['colors']
-special = data['special']
+    # Use ImageMagick to extract 10 dominant colors
+    try:
+        result = subprocess.run(
+            ['convert', image_path, '-resize', '100x100', '-colors', '10',
+             '-depth', '8', '-format', '%c', 'histogram:info:-'],
+            capture_output=True, text=True, timeout=10
+        )
+        output = result.stdout
+    except:
+        # Fallback to magick if convert is deprecated
+        result = subprocess.run(
+            ['magick', image_path, '-resize', '100x100', '-colors', '10',
+             '-depth', '8', '-format', '%c', 'histogram:info:-'],
+            capture_output=True, text=True, timeout=10
+        )
+        output = result.stdout
 
-bg = special['background']
-text = special['foreground']
+    # Parse histogram output and extract hex colors
+    colors_hex = []
+    for line in output.split('\n'):
+        line = line.strip()
+        if not line:
+            continue
+        # Extract hex color (format: "count: (r,g,b) #HEXCOLOR")
+        if '#' in line:
+            try:
+                hex_color = '#' + line.split('#')[1].split()[0]
+                if len(hex_color) == 7:  # Valid hex color
+                    colors_hex.append(hex_color)
+            except:
+                pass
 
-# Color mapping (using standard ANSI positions)
-primary = colors.get('4', '#0000ff')      # Blue
-secondary = colors.get('6', '#00ffff')    # Cyan
-accent = colors.get('5', '#ff00ff')       # Magenta
-error = colors.get('1', '#ff0000')        # Red
-success = colors.get('2', '#00ff00')      # Green
-warning = colors.get('3', '#ffff00')      # Yellow
+    if len(colors_hex) < 8:
+        # Fallback to hardcoded defaults if extraction fails
+        print("WARNING: Using default color palette", file=sys.stderr)
+        colors_hex = ['#1e1e2e', '#89b4fa', '#94e2d5', '#f5c2e7',
+                      '#f38ba8', '#a6e3a1', '#f9e2af', '#cdd6f4']
 
-print(f"PRIMARY={primary}")
-print(f"SECONDARY={secondary}")
-print(f"ACCENT={accent}")
-print(f"BG={bg}")
-print(f"TEXT={text}")
-print(f"ERROR={error}")
-print(f"SUCCESS={success}")
-print(f"WARNING={warning}")
+    # Helper functions
+    def hex_to_rgb(hex_color):
+        hex_color = hex_color.lstrip('#')
+        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
-# Generate variants
-import colorsys
+    def rgb_to_hex(rgb):
+        return '#{:02x}{:02x}{:02x}'.format(int(rgb[0]), int(rgb[1]), int(rgb[2]))
 
-def hex_to_rgb(hex_color):
-    hex_color = hex_color.lstrip('#')
-    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    def lighten(hex_color, factor=0.15):
+        rgb = hex_to_rgb(hex_color)
+        rgb = tuple(min(255, int(c + 255 * factor)) for c in rgb)
+        return rgb_to_hex(rgb)
 
-def rgb_to_hex(rgb):
-    return '#{:02x}{:02x}{:02x}'.format(int(rgb[0]), int(rgb[1]), int(rgb[2]))
+    def darken(hex_color, factor=0.15):
+        rgb = hex_to_rgb(hex_color)
+        rgb = tuple(max(0, int(c - 255 * factor)) for c in rgb)
+        return rgb_to_hex(rgb)
 
-def lighten(hex_color, factor=0.15):
-    rgb = hex_to_rgb(hex_color)
-    rgb = tuple(min(255, c + int(255 * factor)) for c in rgb)
-    return rgb_to_hex(rgb)
+    def get_luminance(hex_color):
+        rgb = hex_to_rgb(hex_color)
+        # Calculate relative luminance
+        return (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255
 
-def darken(hex_color, factor=0.15):
-    rgb = hex_to_rgb(hex_color)
-    rgb = tuple(max(0, c - int(255 * factor)) for c in rgb)
-    return rgb_to_hex(rgb)
+    # Assign colors based on brightness/hue
+    colors_hex = list(dict.fromkeys(colors_hex))  # Remove duplicates, keep order
+    colors_hex = sorted(colors_hex, key=lambda x: (get_luminance(x), x))
 
-print(f"BG_LIGHT={lighten(bg)}")
-print(f"BG_DARK={darken(bg)}")
-PYTHON_EOF
-)
+    # Use the darkest color as background
+    bg = colors_hex[0]
+    # Use the lightest as text
+    text = colors_hex[-1]
+    # Ensure good contrast
+    if get_luminance(bg) > 0.5:
+        bg = '#1e1e2e'  # Fallback to dark
+    if get_luminance(text) < 0.5:
+        text = '#cdd6f4'  # Fallback to light
+
+    # Assign other colors from the palette
+    primary = colors_hex[min(3, len(colors_hex)-1)]    # Blue-ish
+    secondary = colors_hex[min(4, len(colors_hex)-1)]  # Cyan-ish
+    accent = colors_hex[min(5, len(colors_hex)-1)]     # Magenta-ish
+    error = '#f38ba8'    # Red (fixed)
+    success = '#a6e3a1'  # Green (fixed)
+    warning = '#f9e2af'  # Yellow (fixed)
+
+    # Output color definitions
+    print(f"PRIMARY={primary}")
+    print(f"SECONDARY={secondary}")
+    print(f"ACCENT={accent}")
+    print(f"BG={bg}")
+    print(f"TEXT={text}")
+    print(f"ERROR={error}")
+    print(f"SUCCESS={success}")
+    print(f"WARNING={warning}")
+    print(f"BG_LIGHT={lighten(bg)}")
+    print(f"BG_DARK={darken(bg)}")
+
+except Exception as e:
+    print(f"Error: {e}", file=sys.stderr)
+    sys.exit(1)
+PYTHON_SCRIPT
+
+    # Run extraction script
+    local palette=$(python3 "$temp_py" "$image_path" 2>&1)
+    local result=$?
+
+    rm -f "$temp_py"
+
+    if [ $result -ne 0 ]; then
+        log_error "Failed to extract colors from image"
+        return 1
+    fi
 
     # Write to colors.env
     cat > "$colors_file" << EOF

@@ -18,6 +18,7 @@ All configurations are backed up before changes, and you can restore previous th
 
 ✨ **One-Command Theming**
 - Pass an image file, get a fully themed system
+- Automatically sets wallpaper and colors across all apps
 
 🔄 **Automatic Backups**
 - All changes are backed up with timestamps
@@ -28,8 +29,14 @@ All configurations are backed up before changes, and you can restore previous th
 - Re-apply themes without re-processing images
 
 🎨 **Consistent Colors**
+- Extracts dominant colors from images
 - Semantic color mapping (primary, accent, error, success, etc.)
 - Light/dark variants for depth
+
+🖼️ **Wallpaper Integration**
+- Automatically sets the image as system wallpaper
+- Works with hyprpaper (optional)
+- Falls back gracefully if hyprpaper unavailable
 
 🛡️ **Safe Updates**
 - Validates template substitution
@@ -71,12 +78,13 @@ All configurations are backed up before changes, and you can restore previous th
 ```
 
 This will:
-1. Extract colors from the image using pywal
+1. Extract colors from the image
 2. Generate a color palette
 3. **Backup** your current configuration
-4. Update all application configs
-5. Save the palette for future use
-6. Show the backup location for reference
+4. Update all application configs (Hyprland, Kitty, Mako, Waybar, Wofi)
+5. Set the image as your wallpaper (via hyprpaper, if available)
+6. Save the palette for future use
+7. Show the backup location for reference
 
 ### Restore Previous Configuration
 
