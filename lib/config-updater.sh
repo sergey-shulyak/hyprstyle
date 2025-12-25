@@ -254,7 +254,7 @@ set_wallpaper() {
     # Restart hyprpaper to apply new config
     pkill hyprpaper 2>/dev/null || true
     sleep 0.5
-    hyprpaper & 2>/dev/null || true
+    hyprpaper >/dev/null 2>&1 &
 
     return 0
 }
