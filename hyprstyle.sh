@@ -287,11 +287,14 @@ reload_components() {
     fi
 
     # Restart Waybar
-    if systemctl --user is-enabled waybar &>/dev/null; then
+    if pgrep -x waybar &>/dev/null; then
         log_info "Restarting Waybar..."
-        systemctl --user restart waybar 2>/dev/null || log_warn "Failed to restart Waybar"
+        pkill waybar 2>/dev/null || true
+        sleep 0.2
+        nohup waybar >/dev/null 2>&1 & disown 2>/dev/null
     else
-        log_warn "Waybar not enabled, skipping restart"
+        log_info "Waybar not running, starting..."
+        nohup waybar >/dev/null 2>&1 & disown 2>/dev/null
     fi
 
     # Restart Mako
