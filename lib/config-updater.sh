@@ -252,9 +252,9 @@ set_wallpaper() {
     log_info "Created hyprpaper config at $hyprpaper_config"
 
     # Restart hyprpaper to apply new config
-    pkill hyprpaper
+    pkill hyprpaper 2>/dev/null || true
     sleep 0.5
-    hyprpaper &
+    hyprpaper & 2>/dev/null || true
 
     return 0
 }
