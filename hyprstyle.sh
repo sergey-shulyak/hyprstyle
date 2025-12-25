@@ -106,6 +106,7 @@ validate_setup() {
         "mako.config"
         "waybar.style.css"
         "wofi.style.css"
+        "nvim.colors.lua"
     )
 
     for template in "${required_templates[@]}"; do
@@ -303,6 +304,56 @@ reload_components() {
         systemctl --user restart mako 2>/dev/null || log_warn "Failed to restart Mako"
     else
         log_warn "Mako not enabled, skipping restart"
+    fi
+
+    # Reload Neovim - try all running instances
+    if pgrep -x nvim &>/dev/null; then
+        log_info "Reloading Neovim..."
+
+        # Try common socket paths (both standard and custom patterns)
+        local sockets=()
+
+        # Direct socket paths to try
+        if [ -S "/tmp/nvim.sock" ]; then
+            sockets+=("/tmp/nvim.sock")
+        fi
+        if [ -S "$HOME/.cache/nvim/server.sock" ]; then
+            sockets+=("$HOME/.cache/nvim/server.sock")
+        fi
+
+        # Also search for any nvim sockets in /tmp
+        while IFS= read -r socket; do
+            sockets+=("$socket")
+        done < <(find /tmp -maxdepth 1 \( -name "nvim*.sock" -o -name "nvim.*" \) -type s 2>/dev/null)
+
+        # Also check /run/user for systemd user runtime directory
+        local user_runtime="/run/user/$(id -u)"
+        if [ -d "$user_runtime" ]; then
+            while IFS= read -r socket; do
+                sockets+=("$socket")
+            done < <(find "$user_runtime" -maxdepth 2 -name "nvim*" -type s 2>/dev/null)
+        fi
+
+        # Remove duplicates
+        sockets=($(printf '%s\n' "${sockets[@]}" | sort -u))
+
+        if [ ${#sockets[@]} -gt 0 ]; then
+            for socket in "${sockets[@]}"; do
+                # Clear the module cache, reload, and apply colors
+                # This ensures the updated colors file is read
+                nvim --server "$socket" --remote-send ":lua package.loaded['nvim-colors']=nil; require('nvim-colors').setup()<CR>" 2>/dev/null && log_info "Reloaded colors on $socket" || true
+            done
+        else
+            # Provide helpful instructions
+            log_warn "No Neovim RPC socket found for hot reload"
+            log_warn "To enable hot color reloading, start Neovim with:"
+            log_warn "  nvim --listen /tmp/nvim.sock"
+            log_warn "Or add to your shell config (.zshrc/.bashrc):"
+            log_warn "  alias nvim='nvim --listen /tmp/nvim-\$\$.sock'"
+            log_warn "Colors will still apply on next Neovim restart"
+        fi
+    else
+        log_info "Neovim not running, skipping reload"
     fi
 
     log_info "Component reload complete"

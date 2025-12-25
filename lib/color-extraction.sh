@@ -358,6 +358,34 @@ try:
     # Generate BG_LIGHT with proper contrast
     bg_light = create_light_bg(bg, text)
 
+    # Generate CURSORLINE color with good contrast to text for UI elements
+    # This is used for line highlighting and should be very subtle, almost imperceptible
+    def create_cursorline_bg(bg_color, text_color, primary_color):
+        # For cursorline, use a color that's:
+        # 1. Very subtle and non-intrusive
+        # 2. Has good contrast with text for readability
+        # 3. Doesn't conflict with syntax highlighting
+        bg_lum = get_luminance(bg_color)
+        text_lum = get_luminance(text_color)
+
+        # If text is very light (light theme or light text on dark bg),
+        # use an extremely subtle darkened primary for cursorline
+        if text_lum > 0.6:
+            # Text is light, so use an extremely subtle highlight
+            # Darken the primary color very significantly for extreme subtlety
+            primary_lum = get_luminance(primary_color)
+            if primary_lum > 0.5:
+                # Primary is light, darken it very significantly for extreme subtlety
+                return darken(primary_color, 0.45)
+            else:
+                # Primary is dark, just barely lighten it
+                return lighten(primary_color, 0.02)
+        else:
+            # Text is dark, use an extremely subtle highlight
+            return lighten(bg_color, 0.02)
+
+    cursorline = create_cursorline_bg(bg, text, primary)
+
     # Output color definitions (hex format)
     print(f"PRIMARY={primary}")
     print(f"SECONDARY={secondary}")
@@ -369,6 +397,7 @@ try:
     print(f"WARNING={warning}")
     print(f"BG_LIGHT={bg_light}")
     print(f"BG_DARK={darken(bg)}")
+    print(f"CURSORLINE={cursorline}")
 
     # Output rgba hex format for use in Hyprland
     print(f"ACCENT_RGBA='{hex_to_rgba_hex(accent)}'")
@@ -401,7 +430,7 @@ PYTHON_SCRIPT
 $palette
 
 # Export for use in other scripts and templates
-export PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK
+export PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK CURSORLINE
 export ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA
 EOF
 

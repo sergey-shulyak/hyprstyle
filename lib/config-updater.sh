@@ -176,6 +176,55 @@ update_wofi() {
     return 0
 }
 
+# Update Neovim configuration
+update_nvim() {
+    local template_dir="$1"
+    local config_dir="$HOME/.config/nvim"
+    local lua_dir="$config_dir/lua"
+    local colors_file="$lua_dir/nvim-colors.lua"
+    local init_file="$config_dir/init.lua"
+
+    log_info "Updating Neovim configuration..."
+
+    if [ ! -d "$config_dir" ]; then
+        log_error "Neovim config directory not found: $config_dir"
+        return 1
+    fi
+
+    # Create lua directory if it doesn't exist (standard Neovim module location)
+    if [ ! -d "$lua_dir" ]; then
+        mkdir -p "$lua_dir"
+    fi
+
+    # Apply template to create colors file in lua directory
+    apply_template "$template_dir/nvim.colors.lua" "$colors_file" || return 1
+
+    # Check if init.lua sources the colors file
+    if [ ! -f "$init_file" ]; then
+        log_error "Neovim init.lua not found: $init_file"
+        return 1
+    fi
+
+    if ! grep -q "nvim-colors" "$init_file"; then
+        log_warn "Adding nvim-colors VimEnter hook to init.lua"
+        # Add autocmd after lazy.setup() to apply colors after plugins and colorscheme load
+        # This ensures our colors override the colorscheme
+        cat >> "$init_file" << 'EOF'
+
+-- Apply hyprstyle colors after plugins and colorscheme load
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    if pcall(require, "nvim-colors") then
+      require("nvim-colors").setup()
+    end
+  end,
+})
+EOF
+    fi
+
+    return 0
+}
+
 # Update all application configurations
 update_all_configs() {
     local template_dir="$1"
@@ -187,6 +236,7 @@ update_all_configs() {
     update_mako "$template_dir" || log_warn "Failed to update Mako"
     update_waybar "$template_dir" || log_warn "Failed to update Waybar"
     update_wofi "$template_dir" || log_warn "Failed to update Wofi"
+    update_nvim "$template_dir" || log_warn "Failed to update Neovim"
 
     log_info "Configuration update complete"
     return 0
