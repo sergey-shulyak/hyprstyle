@@ -13,15 +13,15 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    echo -e "${GREEN}[INFO]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    echo -e "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 # Source colors from colors.env file
@@ -58,7 +58,7 @@ apply_template() {
     if [[ "$template_file" == *"hyprland"* ]]; then
         # Use sed to replace @@VARNAME@@ with environment variable values
         sed_cmd="cat \"$template_file\""
-        for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA; do
+        for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK BUTTON_BG PRIMARY_RGBA SECONDARY_RGBA ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA BG_LIGHT_RGB BUTTON_BG_RGB ACCENT_RGB; do
             value=$(eval echo \$${var})
             sed_cmd="$sed_cmd | sed \"s|@@${var}@@|${value}|g\""
         done
@@ -279,11 +279,11 @@ set_wallpaper() {
     # Get all monitors from Hyprland
     local monitors
     if command -v jq &>/dev/null; then
-        monitors=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | .name')
+        monitors=$(hyprctl monitors -j 2>/dev/null 3>/dev/null | jq -r '.[] | .name')
     else
         # Fallback: Extract monitor names using grep and tr
         # Monitor JSON starts with "name" as the second key after "id"
-        monitors=$(hyprctl monitors -j 2>/dev/null | grep '"name"' | head -n $(hyprctl monitors -j 2>/dev/null | grep -c '^\s*{') | sed 's/.*"name"\s*:\s*"\([^"]*\)".*/\1/')
+        monitors=$(hyprctl monitors -j 2>/dev/null 3>/dev/null | grep '"name"' | head -n $(hyprctl monitors -j 2>/dev/null 3>/dev/null | grep -c '^\s*{') | sed 's/.*"name"\s*:\s*"\([^"]*\)".*/\1/')
     fi
 
     if [ -z "$monitors" ]; then

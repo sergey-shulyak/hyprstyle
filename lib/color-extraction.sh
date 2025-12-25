@@ -13,15 +13,15 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    echo -e "${GREEN}[INFO]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    echo -e "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 # Check if required tools are installed
@@ -400,9 +400,27 @@ try:
     print(f"CURSORLINE={cursorline}")
 
     # Output rgba hex format for use in Hyprland
+    print(f"PRIMARY_RGBA='{hex_to_rgba_hex(primary)}'")
+    print(f"SECONDARY_RGBA='{hex_to_rgba_hex(secondary)}'")
     print(f"ACCENT_RGBA='{hex_to_rgba_hex(accent)}'")
     print(f"BG_LIGHT_RGBA='{hex_to_rgba_hex(lighten(bg))}'")
     print(f"BG_DARK_RGBA='{hex_to_rgba_hex(darken(bg))}'")
+
+    # Output RGB format for use in CSS (without alpha channel)
+    def hex_to_rgb_str(hex_color):
+        hex_color = hex_color.lstrip('#')
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        return f"{r}, {g}, {b}"
+
+    # Generate button background - slightly lighter than background for contrast
+    button_bg = lighten(bg, 0.05)
+
+    print(f"BG_LIGHT_RGB='{hex_to_rgb_str(bg_light)}'")
+    print(f"BUTTON_BG='{button_bg}'")
+    print(f"BUTTON_BG_RGB='{hex_to_rgb_str(button_bg)}'")
+    print(f"ACCENT_RGB='{hex_to_rgb_str(accent)}'")
 
 except Exception as e:
     print(f"Error: {e}", file=sys.stderr)
@@ -430,8 +448,8 @@ PYTHON_SCRIPT
 $palette
 
 # Export for use in other scripts and templates
-export PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK CURSORLINE
-export ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA
+export PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK CURSORLINE BUTTON_BG
+export PRIMARY_RGBA SECONDARY_RGBA ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA BG_LIGHT_RGB BUTTON_BG_RGB ACCENT_RGB
 EOF
 
     log_info "Color palette created successfully"

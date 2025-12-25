@@ -14,15 +14,15 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    echo -e "${GREEN}[INFO]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    echo -e "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 # Create timestamped backup of configuration files
@@ -100,13 +100,13 @@ list_backups() {
         return 0
     fi
 
-    echo -e "\n${BLUE}Available backups:${NC}"
+    echo -e "\n${BLUE}Available backups:${NC}" >&2
     ls -t "$backup_dir" | while read -r backup; do
         local backup_date=$(echo "$backup" | cut -d'_' -f1-3)
         local backup_time=$(echo "$backup" | cut -d'_' -f4 | sed 's/\(..\)/\1:\1:/g' | sed 's/:$//')
-        echo "  $backup"
+        echo "  $backup" >&2
     done
-    echo ""
+    echo "" >&2
 }
 
 # Save color palette as JSON
@@ -224,11 +224,11 @@ list_palettes() {
         return 0
     fi
 
-    echo -e "\n${BLUE}Available color palettes:${NC}"
+    echo -e "\n${BLUE}Available color palettes:${NC}" >&2
     ls "$palette_dir" | grep -E '\.json$' | sed 's/\.json$//' | while read -r palette; do
-        echo "  $palette"
+        echo "  $palette" >&2
     done
-    echo ""
+    echo "" >&2
 }
 
 # Get info about a specific palette
@@ -243,21 +243,22 @@ palette_info() {
         return 1
     fi
 
-    echo -e "\n${BLUE}Palette: $palette_name${NC}"
+    echo -e "\n${BLUE}Palette: $palette_name${NC}" >&2
     python3 << PYTHON_EOF
 import json
+import sys
 
 json_file = "$json_file"
 with open(json_file) as f:
     palette = json.load(f)
 
-print(f"  Timestamp: {palette['timestamp']}")
-print(f"  Source Image: {palette['source_image']}")
-print(f"  Colors:")
+print(f"  Timestamp: {palette['timestamp']}", file=sys.stderr)
+print(f"  Source Image: {palette['source_image']}", file=sys.stderr)
+print(f"  Colors:", file=sys.stderr)
 for key, value in sorted(palette['colors'].items()):
-    print(f"    {key.upper():12} = {value}")
+    print(f"    {key.upper():12} = {value}", file=sys.stderr)
 PYTHON_EOF
 
-    echo ""
+    echo "" >&2
     return 0
 }

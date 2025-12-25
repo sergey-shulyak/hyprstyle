@@ -36,19 +36,19 @@ source "$LIB_DIR/config-updater.sh"
 source "$LIB_DIR/backup-restore.sh"
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    echo -e "${GREEN}[INFO]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    echo -e "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 print_header() {
-    echo -e "\n${BLUE}=== $1 ===${NC}\n"
+    echo -e "\n${BLUE}=== $1 ===${NC}\n" >&2
 }
 
 # Show usage information
@@ -174,11 +174,11 @@ generate_theme_from_image() {
     # Reload components
     reload_components
 
-    echo -e "\n${GREEN}✓ Theme generated successfully!${NC}"
-    echo -e "\nNext steps:"
-    echo "  1. Commit changes to git (optional)"
-    echo "  2. To restore this backup later: ./hyprstyle.sh --restore $backup_path"
-    echo ""
+    echo -e "\n${GREEN}✓ Theme generated successfully!${NC}" >&2
+    echo -e "\nNext steps:" >&2
+    echo "  1. Commit changes to git (optional)" >&2
+    echo "  2. To restore this backup later: ./hyprstyle.sh --restore $backup_path" >&2
+    echo "" >&2
 
     return 0
 }
@@ -203,10 +203,10 @@ restore_from_backup() {
     reload_components
 
     print_header "Restore Complete"
-    echo -e "${GREEN}✓ Configuration restored successfully!${NC}"
-    echo -e "\nNext steps:"
-    echo "  1. Your theme has been restored and components reloaded"
-    echo ""
+    echo -e "${GREEN}✓ Configuration restored successfully!${NC}" >&2
+    echo -e "\nNext steps:" >&2
+    echo "  1. Your theme has been restored and components reloaded" >&2
+    echo "" >&2
 
     return 0
 }
@@ -250,10 +250,10 @@ apply_palette() {
     reload_components
 
     print_header "Palette Applied"
-    echo -e "${GREEN}✓ Palette applied successfully!${NC}"
-    echo -e "\nNext steps:"
-    echo "  1. Your theme has been applied and components reloaded"
-    echo ""
+    echo -e "${GREEN}✓ Palette applied successfully!${NC}" >&2
+    echo -e "\nNext steps:" >&2
+    echo "  1. Your theme has been applied and components reloaded" >&2
+    echo "" >&2
 
     return 0
 }
@@ -273,7 +273,7 @@ reload_components() {
     # Reload Hyprland
     if command -v hyprctl &>/dev/null; then
         log_info "Reloading Hyprland..."
-        hyprctl reload 2>/dev/null || log_warn "Failed to reload Hyprland"
+        hyprctl reload 2>/dev/null 3>/dev/null || log_warn "Failed to reload Hyprland"
     else
         log_warn "hyprctl not found, skipping Hyprland reload"
     fi
@@ -290,18 +290,18 @@ reload_components() {
     # Restart Waybar
     if pgrep -x waybar &>/dev/null; then
         log_info "Restarting Waybar..."
-        pkill waybar 2>/dev/null || true
+        pkill waybar 2>/dev/null 3>/dev/null || true
         sleep 0.2
-        nohup waybar >/dev/null 2>&1 & disown 2>/dev/null
+        nohup waybar >/dev/null 2>&1 3>/dev/null & disown 2>/dev/null 3>/dev/null
     else
         log_info "Waybar not running, starting..."
-        nohup waybar >/dev/null 2>&1 & disown 2>/dev/null
+        nohup waybar >/dev/null 2>&1 3>/dev/null & disown 2>/dev/null 3>/dev/null
     fi
 
     # Restart Mako
     if systemctl --user is-enabled mako &>/dev/null; then
         log_info "Restarting Mako..."
-        systemctl --user restart mako 2>/dev/null || log_warn "Failed to restart Mako"
+        systemctl --user restart mako 2>/dev/null 3>/dev/null || log_warn "Failed to restart Mako"
     else
         log_warn "Mako not enabled, skipping restart"
     fi

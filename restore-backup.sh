@@ -28,19 +28,19 @@ NC='\033[0m'
 source "$LIB_DIR/backup-restore.sh"
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    echo -e "${GREEN}[INFO]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    echo -e "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 print_header() {
-    echo -e "\n${BLUE}=== $1 ===${NC}\n"
+    echo -e "\n${BLUE}=== $1 ===${NC}\n" >&2
 }
 
 # Show available backups and let user select one
