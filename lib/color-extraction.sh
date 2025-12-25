@@ -256,37 +256,107 @@ try:
         rgb = tuple(max(0, int(c - 255 * factor)) for c in rgb)
         return rgb_to_hex(rgb)
 
+    def create_light_bg(bg_color, text_color):
+        # Create a light background color that has good contrast with dark background
+        # Use a color between background and text that's much lighter than background
+        bg_lum = get_luminance(bg_color)
+        text_lum = get_luminance(text_color)
+
+        # If background is dark (low luminance), create a light gray/text-based light color
+        if bg_lum < 0.3:
+            # Return a light gray that contrasts well with dark bg
+            # Aim for at least 4:1 contrast
+            return '#a0a0a0' if text_lum > 0.5 else '#c0c0c0'
+        else:
+            # If background is light, darken it
+            return darken(bg_color, 0.25)
+
     def get_luminance(hex_color):
         rgb = hex_to_rgb(hex_color)
-        # Calculate relative luminance
-        return (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255
+        # WCAG 2.0 relative luminance formula
+        def adjust_channel(c):
+            c = c / 255.0
+            if c <= 0.03928:
+                return c / 12.92
+            else:
+                return ((c + 0.055) / 1.055) ** 2.4
+        r = adjust_channel(rgb[0])
+        g = adjust_channel(rgb[1])
+        b = adjust_channel(rgb[2])
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+    def get_contrast_ratio(color1, color2):
+        # Calculate WCAG contrast ratio between two colors
+        l1 = get_luminance(color1)
+        l2 = get_luminance(color2)
+        lighter = max(l1, l2)
+        darker = min(l1, l2)
+        return (lighter + 0.05) / (darker + 0.05)
+
+    def ensure_contrast(bg_color, text_color, min_ratio=4.5):
+        # Ensure minimum contrast ratio of 4.5:1 (AA standard)
+        if get_contrast_ratio(bg_color, text_color) >= min_ratio:
+            return bg_color, text_color
+
+        # If contrast is insufficient, adjust text color
+        bg_luminance = get_luminance(bg_color)
+        if bg_luminance > 0.5:
+            # Dark background, use light text
+            return bg_color, '#f0f0f0'
+        else:
+            # Light background, use dark text
+            return bg_color, '#1a1a1a'
 
     # Assign colors based on brightness/hue
     colors_hex = list(dict.fromkeys(colors_hex))  # Remove duplicates, keep order
-    colors_hex = sorted(colors_hex, key=lambda x: (get_luminance(x), x))
+    colors_hex = sorted(colors_hex, key=lambda x: get_luminance(x))
 
     # Use the darkest color as background
     bg = colors_hex[0]
     # Use the lightest as text
     text = colors_hex[-1]
-    # Ensure good contrast
+
+    # Ensure good contrast with WCAG standards
     if get_luminance(bg) > 0.5:
         bg = '#1e1e2e'  # Fallback to dark
-    if get_luminance(text) < 0.5:
-        text = '#cdd6f4'  # Fallback to light
+
+    # Ensure text has proper contrast with background
+    bg, text = ensure_contrast(bg, text, min_ratio=4.5)
 
     # Assign other colors from the palette
-    primary = colors_hex[min(3, len(colors_hex)-1)]    # Blue-ish
-    secondary = colors_hex[min(4, len(colors_hex)-1)]  # Cyan-ish
-    accent = colors_hex[min(5, len(colors_hex)-1)]     # Magenta-ish
-    error = '#f38ba8'    # Red (fixed)
-    success = '#a6e3a1'  # Green (fixed)
-    warning = '#f9e2af'  # Yellow (fixed)
+    # Use colors that are far from background in luminance for better contrast
+    primary = colors_hex[min(3, len(colors_hex)-1)]
+    secondary = colors_hex[min(4, len(colors_hex)-1)]
+    accent = colors_hex[min(5, len(colors_hex)-1)]
+
+    # Ensure semantic colors have good contrast with background (min 3:1 for UI)
+    if get_contrast_ratio(bg, primary) < 3:
+        primary = text
+    if get_contrast_ratio(bg, secondary) < 3:
+        secondary = text
+    if get_contrast_ratio(bg, accent) < 3:
+        accent = text
+
+    # Use fixed semantic colors, but ensure they have good contrast
+    error = '#f38ba8'    # Red
+    success = '#a6e3a1'  # Green
+    warning = '#f9e2af'  # Yellow
+
+    # Ensure error, success, warning have good contrast with background (min 3:1)
+    if get_contrast_ratio(bg, error) < 3:
+        error = '#ff6b9d'  # Brighter red
+    if get_contrast_ratio(bg, success) < 3:
+        success = '#5ff87f'  # Brighter green
+    if get_contrast_ratio(bg, warning) < 3:
+        warning = '#ffd93d'  # Brighter yellow
 
     # Helper function to convert hex to rgba hex format (with full opacity)
     def hex_to_rgba_hex(hex_color):
         hex_color = hex_color.lstrip('#').upper()
         return f"{hex_color}ff"
+
+    # Generate BG_LIGHT with proper contrast
+    bg_light = create_light_bg(bg, text)
 
     # Output color definitions (hex format)
     print(f"PRIMARY={primary}")
@@ -297,7 +367,7 @@ try:
     print(f"ERROR={error}")
     print(f"SUCCESS={success}")
     print(f"WARNING={warning}")
-    print(f"BG_LIGHT={lighten(bg)}")
+    print(f"BG_LIGHT={bg_light}")
     print(f"BG_DARK={darken(bg)}")
 
     # Output rgba hex format for use in Hyprland
