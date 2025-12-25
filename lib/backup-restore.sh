@@ -183,6 +183,10 @@ load_palette() {
     python3 << PYTHON_EOF
 import json
 
+def hex_to_rgba_hex(hex_color):
+    hex_color = hex_color.lstrip('#').upper()
+    return f"{hex_color}ff"
+
 json_file = "$json_file"
 with open(json_file) as f:
     palette = json.load(f)
@@ -196,7 +200,14 @@ with open("$output_colors_env", 'w') as f:
     f.write(f"# Source image: {palette['source_image']}\n\n")
     for key, value in colors.items():
         f.write(f"{key.upper()}={value}\n")
-    f.write("\nexport " + " ".join(colors.keys()).upper() + "\n")
+
+    # Add rgba hex format for specific colors needed by Hyprland
+    f.write(f"\n# Rgba hex format for Hyprland\n")
+    f.write(f"ACCENT_RGBA='{hex_to_rgba_hex(colors.get('accent', '#888888'))}'\n")
+    f.write(f"BG_LIGHT_RGBA='{hex_to_rgba_hex(colors.get('bg_light', '#999999'))}'\n")
+    f.write(f"BG_DARK_RGBA='{hex_to_rgba_hex(colors.get('bg_dark', '#000000'))}'\n")
+
+    f.write("\nexport " + " ".join(colors.keys()).upper() + " ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA\n")
 
 print("Loaded palette: $palette_name")
 PYTHON_EOF

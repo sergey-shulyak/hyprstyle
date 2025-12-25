@@ -58,7 +58,7 @@ apply_template() {
     if [[ "$template_file" == *"hyprland"* ]]; then
         # Use sed to replace @@VARNAME@@ with environment variable values
         sed_cmd="cat \"$template_file\""
-        for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK; do
+        for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA; do
             value=$(eval echo \$${var})
             sed_cmd="$sed_cmd | sed \"s|@@${var}@@|${value}|g\""
         done
@@ -106,24 +106,11 @@ update_kitty() {
     local template_dir="$1"
     local config_dir="$HOME/.config/kitty"
     local config_file="$config_dir/kitty.conf"
-    local backup_file="$config_file.backup"
 
     log_info "Updating Kitty configuration..."
 
-    # Create a temporary file with color section
-    local temp_file=$(mktemp)
-    apply_template "$template_dir/kitty.conf" "$temp_file" || return 1
-
-    # Remove existing color definitions from kitty.conf
-    local work_file=$(mktemp)
-    grep -v "^foreground\|^background\|^selection_\|^url_color\|^color[0-9]" "$config_file" > "$work_file" || true
-
-    # Append new color section
-    cat "$temp_file" >> "$work_file"
-
-    # Replace original
-    mv "$work_file" "$config_file"
-    rm -f "$temp_file"
+    # Apply full template (replaces entire file)
+    apply_template "$template_dir/kitty.conf" "$config_file" || return 1
 
     log_info "Updated: $config_file"
     return 0
@@ -229,29 +216,45 @@ set_wallpaper() {
     fi
 
     # Check if hyprpaper is available
-    if ! command -v hyprctl &>/dev/null; then
-        log_warn "hyprctl not found, skipping wallpaper setting"
+    if ! command -v hyprpaper &>/dev/null; then
+        log_warn "hyprpaper not found, skipping wallpaper setting"
         return 0
     fi
 
     log_info "Setting wallpaper with hyprpaper..."
 
-    # Get all monitors
-    local monitors=$(hyprctl monitors -j 2>/dev/null | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
+    # Create hyprpaper config
+    local hyprpaper_config="$HOME/.config/hypr/hyprpaper.conf"
+
+    # Get all monitors from Hyprland
+    local monitors
+    if command -v jq &>/dev/null; then
+        monitors=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | .name')
+    else
+        # Fallback: Extract monitor names using grep and tr
+        # Monitor JSON starts with "name" as the second key after "id"
+        monitors=$(hyprctl monitors -j 2>/dev/null | grep '"name"' | head -n $(hyprctl monitors -j 2>/dev/null | grep -c '^\s*{') | sed 's/.*"name"\s*:\s*"\([^"]*\)".*/\1/')
+    fi
 
     if [ -z "$monitors" ]; then
         log_warn "Could not detect monitors, skipping wallpaper"
         return 0
     fi
 
-    # Preload the image
-    hyprctl hyprpaper preload "$image_path" 2>/dev/null
+    # Generate hyprpaper config
+    {
+        echo "preload = $image_path"
+        while read -r monitor; do
+            echo "wallpaper = $monitor,$image_path"
+        done <<< "$monitors"
+    } > "$hyprpaper_config"
 
-    # Set wallpaper for each monitor
-    while read -r monitor; do
-        hyprctl hyprpaper wallpaper "$monitor,$image_path" 2>/dev/null
-        log_info "Set wallpaper for $monitor"
-    done <<< "$monitors"
+    log_info "Created hyprpaper config at $hyprpaper_config"
+
+    # Restart hyprpaper to apply new config
+    pkill hyprpaper
+    sleep 0.5
+    hyprpaper &
 
     return 0
 }

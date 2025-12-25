@@ -44,6 +44,28 @@ check_dependencies() {
     return 0
 }
 
+# Convert hex color to rgba format (for Hyprland gradients)
+hex_to_rgba() {
+    local hex="$1"
+    local alpha="${2:-ff}"  # Default to full opacity
+
+    # Remove '#' if present
+    hex="${hex#\#}"
+
+    # Convert to uppercase for consistency
+    hex="${hex^^}"
+
+    # Extract RGB components
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+
+    # Convert alpha from hex to decimal
+    local a=$((16#${alpha}))
+
+    echo "rgba($r, $g, $b, 0x${alpha})"
+}
+
 # Extract colors from image using ImageMagick
 extract_colors_from_image() {
     local image_path="$1"
@@ -261,7 +283,12 @@ try:
     success = '#a6e3a1'  # Green (fixed)
     warning = '#f9e2af'  # Yellow (fixed)
 
-    # Output color definitions
+    # Helper function to convert hex to rgba hex format (with full opacity)
+    def hex_to_rgba_hex(hex_color):
+        hex_color = hex_color.lstrip('#').upper()
+        return f"{hex_color}ff"
+
+    # Output color definitions (hex format)
     print(f"PRIMARY={primary}")
     print(f"SECONDARY={secondary}")
     print(f"ACCENT={accent}")
@@ -272,6 +299,11 @@ try:
     print(f"WARNING={warning}")
     print(f"BG_LIGHT={lighten(bg)}")
     print(f"BG_DARK={darken(bg)}")
+
+    # Output rgba hex format for use in Hyprland
+    print(f"ACCENT_RGBA='{hex_to_rgba_hex(accent)}'")
+    print(f"BG_LIGHT_RGBA='{hex_to_rgba_hex(lighten(bg))}'")
+    print(f"BG_DARK_RGBA='{hex_to_rgba_hex(darken(bg))}'")
 
 except Exception as e:
     print(f"Error: {e}", file=sys.stderr)
@@ -298,8 +330,9 @@ PYTHON_SCRIPT
 # Semantic colors
 $palette
 
-# Export for use in other scripts
+# Export for use in other scripts and templates
 export PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK
+export ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA
 EOF
 
     log_info "Color palette created successfully"
