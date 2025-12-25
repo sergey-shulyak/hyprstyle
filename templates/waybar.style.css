@@ -1,15 +1,15 @@
 * {
   border: none;
   border-radius: 0;
-  font-family: "Noto Sans", "Noto Color Emoji", monospace;
-  font-size: 14px;
+  font-family: "JetBrains Mono", "Noto Color Emoji", monospace;
+  font-size: 12pt;
   min-height: 0;
   margin: 0;
   padding: 0;
 }
 
 window#waybar {
-  background-color: rgba(${BUTTON_BG_RGB}, 0.5);
+  background-color: rgba(${BUTTON_BG_RGB}, 0);
   color: ${TEXT};
   border: none;
 }
@@ -27,11 +27,11 @@ window#waybar > box {
 #workspaces button {
   padding: 4px 8px;
   margin: 0 4px;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
-  color: ${ACCENT};
+  color: ${PRIMARY};
   font-weight: bold;
-  font-size: 16px;
+  font-size: 12pt;
   transition: all 0.3s ease;
 }
 
@@ -48,10 +48,10 @@ window#waybar > box {
 #clock {
   padding: 4px 8px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
-  border-radius: 8px;
+  border-radius: 10px;
   color: ${PRIMARY};
   font-weight: bold;
-  font-size: 16px;
+  font-size: 12pt;
   min-width: 120px;
   transition: all 0.3s ease;
 }
@@ -70,17 +70,17 @@ window#waybar > box {
   padding: 4px 8px;
   margin: 0 4px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
-  border-radius: 8px;
+  border-radius: 10px;
   color: ${TEXT};
   min-width: 40px;
-  font-size: 16px;
+  font-size: 12pt;
   font-weight: bold;
   transition: all 0.3s ease;
 }
 
 #language {
   color: ${SECONDARY};
-  font-size: 16px;
+  font-size: 12pt;
 }
 
 #cpu {
@@ -144,6 +144,5 @@ window#waybar > box {
 #backlight:hover,
 #network:hover,
 #battery:hover {
-  background-color: rgba(${BUTTON_BG_RGB}, 0.7);
-  border-radius: 12px;
+  background-color: rgba(${BUTTON_BG_RGB}, 0.8);
 }
