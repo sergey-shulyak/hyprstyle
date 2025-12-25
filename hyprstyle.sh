@@ -273,7 +273,7 @@ reload_components() {
     # Reload Hyprland
     if command -v hyprctl &>/dev/null; then
         log_info "Reloading Hyprland..."
-        hyprctl reload 2>/dev/null 3>/dev/null || log_warn "Failed to reload Hyprland"
+        hyprctl reload >/dev/null 2>&1 3>/dev/null || log_warn "Failed to reload Hyprland"
     else
         log_warn "hyprctl not found, skipping Hyprland reload"
     fi
@@ -282,7 +282,7 @@ reload_components() {
     # This reloads colors without closing windows
     if pgrep -x kitty &>/dev/null; then
         log_info "Reloading Kitty..."
-        pkill -SIGUSR1 kitty 2>/dev/null || log_warn "Failed to reload Kitty"
+        pkill -SIGUSR1 kitty 2>/dev/null 3>/dev/null || log_warn "Failed to reload Kitty"
     else
         log_info "Kitty not running, skipping reload"
     fi
@@ -292,10 +292,12 @@ reload_components() {
         log_info "Restarting Waybar..."
         pkill waybar 2>/dev/null 3>/dev/null || true
         sleep 0.2
-        nohup waybar >/dev/null 2>&1 3>/dev/null & disown 2>/dev/null 3>/dev/null
+        (nohup waybar >/dev/null 2>&1 3>/dev/null &) 2>/dev/null
+        disown 2>/dev/null 3>/dev/null
     else
         log_info "Waybar not running, starting..."
-        nohup waybar >/dev/null 2>&1 3>/dev/null & disown 2>/dev/null 3>/dev/null
+        (nohup waybar >/dev/null 2>&1 3>/dev/null &) 2>/dev/null
+        disown 2>/dev/null 3>/dev/null
     fi
 
     # Restart Mako
