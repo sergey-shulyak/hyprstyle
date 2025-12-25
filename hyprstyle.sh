@@ -277,6 +277,15 @@ reload_components() {
         log_warn "hyprctl not found, skipping Hyprland reload"
     fi
 
+    # Reload Kitty (send SIGUSR1 to all kitty instances)
+    # This reloads colors without closing windows
+    if pgrep -x kitty &>/dev/null; then
+        log_info "Reloading Kitty..."
+        pkill -SIGUSR1 kitty 2>/dev/null || log_warn "Failed to reload Kitty"
+    else
+        log_info "Kitty not running, skipping reload"
+    fi
+
     # Restart Waybar
     if systemctl --user is-enabled waybar &>/dev/null; then
         log_info "Restarting Waybar..."

@@ -85,6 +85,7 @@ This will:
 5. Set the image as your wallpaper (via hyprpaper, if available)
 6. Automatically reload all components:
    - Hyprland (via `hyprctl reload`)
+   - Kitty (via `pkill -SIGUSR1 kitty` - reloads colors without closing windows)
    - Waybar (via `systemctl --user restart waybar`)
    - Mako (via `systemctl --user restart mako`)
 7. Save the palette for future use
