@@ -292,12 +292,10 @@ reload_components() {
         log_info "Restarting Waybar..."
         pkill waybar 2>/dev/null 3>/dev/null || true
         sleep 0.2
-        (nohup waybar >/dev/null 2>&1 3>/dev/null &) 2>/dev/null
-        disown 2>/dev/null 3>/dev/null
+        (nohup waybar >/dev/null 2>&1 3>/dev/null & disown 2>/dev/null 3>/dev/null) 2>/dev/null
     else
         log_info "Waybar not running, starting..."
-        (nohup waybar >/dev/null 2>&1 3>/dev/null &) 2>/dev/null
-        disown 2>/dev/null 3>/dev/null
+        (nohup waybar >/dev/null 2>&1 3>/dev/null & disown 2>/dev/null 3>/dev/null) 2>/dev/null
     fi
 
     # Restart Mako
