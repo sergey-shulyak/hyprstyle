@@ -5,6 +5,7 @@
 #
 # Usage:
 #   ./hyprstyle.sh <image>              Generate theme from image
+#   ./hyprstyle.sh --backup             Backup current configuration only
 #   ./hyprstyle.sh --restore <backup>   Restore from backup
 #   ./hyprstyle.sh --apply-palette <name> Apply saved palette
 #   ./hyprstyle.sh --list               List backups and palettes
@@ -58,6 +59,7 @@ Hyprstyle - Generate Hyprland color schemes from images
 
 USAGE:
   ./hyprstyle.sh <image>              Generate theme from image file
+  ./hyprstyle.sh --backup             Backup current configuration only
   ./hyprstyle.sh --restore <backup>   Restore configuration from backup
   ./hyprstyle.sh --apply-palette <name> Apply previously saved color palette
   ./hyprstyle.sh --list               List available backups and palettes
@@ -67,6 +69,9 @@ USAGE:
 EXAMPLES:
   # Generate theme from wallpaper
   ./hyprstyle.sh ~/Pictures/wallpaper.png
+
+  # Backup current configuration
+  ./hyprstyle.sh --backup
 
   # Restore previous configuration
   ./hyprstyle.sh --restore 2025-12-25_143022
@@ -178,6 +183,28 @@ generate_theme_from_image() {
     echo -e "\nNext steps:" >&2
     echo "  1. Commit changes to git (optional)" >&2
     echo "  2. To restore this backup later: ./hyprstyle.sh --restore $backup_path" >&2
+    echo "" >&2
+
+    return 0
+}
+
+# Backup only - no theme generation or restoration
+backup_only() {
+    print_header "Backing Up Current Configuration"
+
+    # Create backup
+    local backup_path=$(backup_configs "$BACKUPS_DIR")
+
+    if [ -z "$backup_path" ]; then
+        log_error "Failed to create backup"
+        return 1
+    fi
+
+    print_header "Backup Complete"
+    echo -e "${GREEN}✓ Configuration backed up successfully!${NC}" >&2
+    echo -e "\nBackup location: $backup_path" >&2
+    echo -e "\nTo restore this backup later:" >&2
+    echo "  ./hyprstyle.sh --restore $(basename "$backup_path")" >&2
     echo "" >&2
 
     return 0
@@ -373,6 +400,10 @@ main() {
         --help|-h)
             show_usage
             return 0
+            ;;
+        --backup|-b)
+            backup_only
+            return $?
             ;;
         --list|-l)
             list_all
