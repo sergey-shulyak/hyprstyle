@@ -422,6 +422,12 @@ try:
     print(f"BUTTON_BG_RGB='{hex_to_rgb_str(button_bg)}'")
     print(f"ACCENT_RGB='{hex_to_rgb_str(accent)}'")
 
+    # RGB format for hyprlock colors (without alpha, without # prefix)
+    print(f"TEXT_RGB='{hex_to_rgb_str(text)}'")
+    print(f"ERROR_RGB='{hex_to_rgb_str(error)}'")
+    print(f"SUCCESS_RGB='{hex_to_rgb_str(success)}'")
+    print(f"WARNING_RGB='{hex_to_rgb_str(warning)}'")
+
 except Exception as e:
     print(f"Error: {e}", file=sys.stderr)
     sys.exit(1)
@@ -450,6 +456,7 @@ $palette
 # Export for use in other scripts and templates
 export PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK CURSORLINE BUTTON_BG
 export PRIMARY_RGBA SECONDARY_RGBA ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA BG_LIGHT_RGB BUTTON_BG_RGB ACCENT_RGB
+export TEXT_RGB ERROR_RGB SUCCESS_RGB WARNING_RGB
 EOF
 
     log_info "Color palette created successfully"

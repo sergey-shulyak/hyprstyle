@@ -55,10 +55,10 @@ apply_template() {
     log_info "Applying template: $(basename "$template_file")"
 
     # Use sed for Hyprland templates (uses @@ format), envsubst for others (uses ${} format)
-    if [[ "$template_file" == *"hyprland"* ]]; then
+    if [[ "$template_file" == *"hyprland"* ]] || [[ "$template_file" == *"hyprlock"* ]]; then
         # Use sed to replace @@VARNAME@@ with environment variable values
         sed_cmd="cat \"$template_file\""
-        for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK BUTTON_BG PRIMARY_RGBA SECONDARY_RGBA ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA BG_LIGHT_RGB BUTTON_BG_RGB ACCENT_RGB; do
+        for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK BUTTON_BG PRIMARY_RGBA SECONDARY_RGBA ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA BG_LIGHT_RGB BUTTON_BG_RGB ACCENT_RGB TEXT_RGB ERROR_RGB SUCCESS_RGB WARNING_RGB; do
             value=$(eval echo \$${var})
             sed_cmd="$sed_cmd | sed \"s|@@${var}@@|${value}|g\""
         done
@@ -225,6 +225,25 @@ EOF
     return 0
 }
 
+# Update Hyprlock configuration
+update_hyprlock() {
+    local template_dir="$1"
+    local config_dir="$HOME/.config/hypr"
+    local config_file="$config_dir/hyprlock.conf"
+
+    log_info "Updating Hyprlock configuration..."
+
+    if [ ! -d "$config_dir" ]; then
+        log_error "Hyprland config directory not found: $config_dir"
+        return 1
+    fi
+
+    apply_template "$template_dir/hyprlock.conf" "$config_file" || return 1
+
+    log_info "Updated: $config_file"
+    return 0
+}
+
 # Update all application configurations
 update_all_configs() {
     local template_dir="$1"
@@ -237,6 +256,7 @@ update_all_configs() {
     update_waybar "$template_dir" || log_warn "Failed to update Waybar"
     update_wofi "$template_dir" || log_warn "Failed to update Wofi"
     update_nvim "$template_dir" || log_warn "Failed to update Neovim"
+    update_hyprlock "$template_dir" || log_warn "Failed to update Hyprlock"
 
     log_info "Configuration update complete"
     return 0
