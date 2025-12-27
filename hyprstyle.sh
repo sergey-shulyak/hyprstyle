@@ -4,6 +4,7 @@
 # Generates color schemes from images and applies them to all configured applications
 #
 # Usage:
+#   ./hyprstyle.sh                      Generate theme from default image
 #   ./hyprstyle.sh <image>              Generate theme from image
 #   ./hyprstyle.sh --backup             Backup current configuration only
 #   ./hyprstyle.sh --restore <backup>   Restore from backup
@@ -23,6 +24,7 @@ LIB_DIR="$SCRIPT_DIR/lib"
 BACKUPS_DIR="$SCRIPT_DIR/backups"
 PALETTES_DIR="$SCRIPT_DIR/palettes"
 COLORS_ENV="$SCRIPT_DIR/colors.env"
+DEFAULT_IMAGE="$SCRIPT_DIR/default/Kath.png"
 
 # Colors for output
 RED=$'\033[0;31m'
@@ -58,6 +60,7 @@ show_usage() {
 Hyprstyle - Generate Hyprland color schemes from images
 
 USAGE:
+  ./hyprstyle.sh                      Generate theme from default image
   ./hyprstyle.sh <image>              Generate theme from image file
   ./hyprstyle.sh --backup             Backup current configuration only
   ./hyprstyle.sh --restore <backup>   Restore configuration from backup
@@ -67,6 +70,9 @@ USAGE:
   ./hyprstyle.sh --help               Show this help message
 
 EXAMPLES:
+  # Generate theme from default image
+  ./hyprstyle.sh
+
   # Generate theme from wallpaper
   ./hyprstyle.sh ~/Pictures/wallpaper.png
 
@@ -425,8 +431,9 @@ main() {
             return $?
             ;;
         "")
-            show_usage
-            return 1
+            log_info "No image provided, using default: $DEFAULT_IMAGE"
+            generate_theme_from_image "$DEFAULT_IMAGE"
+            return $?
             ;;
         *)
             if [ ! -f "$1" ]; then
