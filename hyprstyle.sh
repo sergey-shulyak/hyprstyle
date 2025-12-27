@@ -25,11 +25,11 @@ PALETTES_DIR="$SCRIPT_DIR/palettes"
 COLORS_ENV="$SCRIPT_DIR/colors.env"
 
 # Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[0;34m'
+NC=$'\033[0m'
 
 # Source libraries
 source "$LIB_DIR/color-extraction.sh"
@@ -37,19 +37,19 @@ source "$LIB_DIR/config-updater.sh"
 source "$LIB_DIR/backup-restore.sh"
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1" >&2
+    printf "%b\n" "${GREEN}[INFO]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
+    printf "%b\n" "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1" >&2
+    printf "%b\n" "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 print_header() {
-    echo -e "\n${BLUE}=== $1 ===${NC}\n" >&2
+    printf "%b\n" "\n${BLUE}=== $1 ===${NC}\n" >&2
 }
 
 # Show usage information
@@ -172,18 +172,21 @@ generate_theme_from_image() {
 
     # Save palette for future use
     local palette_name=$(basename "$image_path" | sed 's/\.[^.]*$//')
-    if save_palette "$PALETTES_DIR" "$image_path" "$palette_name"; then
+    if save_palette "$PALETTES_DIR" "$image_path" "$palette_name" "$COLORS_ENV"; then
         log_info "Palette saved as: $palette_name"
     fi
 
     # Reload components
     reload_components
 
-    echo -e "\n${GREEN}✓ Theme generated successfully!${NC}" >&2
-    echo -e "\nNext steps:" >&2
+    printf "%b\n" "\n${GREEN}✓ Theme generated successfully!${NC}" >&2
+    printf "%b\n" "\nNext steps:" >&2
     echo "  1. Commit changes to git (optional)" >&2
     echo "  2. To restore this backup later: ./hyprstyle.sh --restore $backup_path" >&2
     echo "" >&2
+
+    # Clear any stray terminal responses (fix for kitty scroll sequences)
+    read -t 0.1 -N 1000 || true
 
     return 0
 }

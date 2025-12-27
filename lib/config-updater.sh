@@ -7,21 +7,21 @@
 set -e
 
 # Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[1;33m'
+NC=$'\033[0m'
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1" >&2
+    printf "%b\n" "${GREEN}[INFO]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
+    printf "%b\n" "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1" >&2
+    printf "%b\n" "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 # Source colors from colors.env file
@@ -296,27 +296,10 @@ set_wallpaper() {
     # Create hyprpaper config
     local hyprpaper_config="$HOME/.config/hypr/hyprpaper.conf"
 
-    # Get all monitors from Hyprland
-    local monitors
-    if command -v jq &>/dev/null; then
-        monitors=$(hyprctl monitors -j 2>/dev/null 3>/dev/null | jq -r '.[] | .name')
-    else
-        # Fallback: Extract monitor names using grep and tr
-        # Monitor JSON starts with "name" as the second key after "id"
-        monitors=$(hyprctl monitors -j 2>/dev/null 3>/dev/null | grep '"name"' | head -n $(hyprctl monitors -j 2>/dev/null 3>/dev/null | grep -c '^\s*{') | sed 's/.*"name"\s*:\s*"\([^"]*\)".*/\1/')
-    fi
-
-    if [ -z "$monitors" ]; then
-        log_warn "Could not detect monitors, skipping wallpaper"
-        return 0
-    fi
-
     # Generate hyprpaper config
     {
         echo "preload = $image_path"
-        while read -r monitor; do
-            echo "wallpaper = $monitor,$image_path"
-        done <<< "$monitors"
+        echo "wallpaper = ,$image_path"
     } > "$hyprpaper_config"
 
     log_info "Created hyprpaper config at $hyprpaper_config"

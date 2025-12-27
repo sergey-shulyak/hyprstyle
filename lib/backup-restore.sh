@@ -7,22 +7,22 @@
 set -e
 
 # Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[0;34m'
+NC=$'\033[0m'
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1" >&2
+    printf "%b\n" "${GREEN}[INFO]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
+    printf "%b\n" "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1" >&2
+    printf "%b\n" "${YELLOW}[WARN]${NC} $1" >&2
 }
 
 # Create timestamped backup of configuration files
@@ -114,8 +114,15 @@ save_palette() {
     local palette_dir="$1"
     local image_path="$2"
     local palette_name="$3"
+    local colors_env="$4"
 
-    local colors_env="$palette_dir/../colors.env"
+    # If colors_env not provided, try to derive it
+    if [ -z "$colors_env" ]; then
+        colors_env="$palette_dir/../colors.env"
+    fi
+
+    # Resolve to absolute path
+    colors_env="$(cd "$(dirname "$colors_env")" && pwd)/$(basename "$colors_env")"
 
     if [ ! -f "$colors_env" ]; then
         log_error "colors.env not found: $colors_env"
