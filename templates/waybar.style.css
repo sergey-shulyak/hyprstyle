@@ -67,7 +67,6 @@ window#waybar > box {
 #backlight,
 #network,
 #battery,
-#custom-tlp-profile,
 #tray {
   padding: 4px 8px;
   margin: 0 4px;
@@ -128,9 +127,6 @@ window#waybar > box {
   animation: blink 0.5s linear infinite;
 }
 
-#custom-tlp-profile {
-  color: ${PRIMARY};
-}
 
 @keyframes blink {
   to {
@@ -150,7 +146,6 @@ window#waybar > box {
 #backlight:hover,
 #network:hover,
 #battery:hover,
-#custom-tlp-profile:hover,
 #tray:hover {
   background-color: rgba(${BUTTON_BG_RGB}, 0.8);
 }
