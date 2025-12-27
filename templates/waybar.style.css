@@ -61,7 +61,6 @@ window#waybar > box {
 #cpu,
 #memory,
 #custom-network-speed,
-#custom-display,
 #temperature,
 #bluetooth,
 #pulseaudio,
@@ -118,10 +117,6 @@ window#waybar > box {
   color: ${PRIMARY};
 }
 
-#custom-display {
-  color: ${PRIMARY};
-}
-
 #battery {
   color: ${SUCCESS};
 }
@@ -145,7 +140,6 @@ window#waybar > box {
 #cpu:hover,
 #memory:hover,
 #custom-network-speed:hover,
-#custom-display:hover,
 #temperature:hover,
 #bluetooth:hover,
 #pulseaudio:hover,
