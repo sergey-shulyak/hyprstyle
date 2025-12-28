@@ -121,10 +121,15 @@ window#waybar > box {
   color: ${SUCCESS};
 }
 
+#battery.warning:not(.charging) {
+  background-color: ${WARNING};
+  color: ${BG};
+}
+
 #battery.critical:not(.charging) {
   background-color: ${ERROR};
   color: ${BG};
-  animation: blink 0.5s linear infinite;
+  animation: blink 1s linear infinite;
 }
 
 
