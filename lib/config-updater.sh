@@ -244,6 +244,35 @@ update_hyprlock() {
     return 0
 }
 
+# Update bat (cat replacement) theme
+update_bat() {
+    local template_dir="$1"
+    local themes_dir="$HOME/.config/bat/themes"
+    local theme_file="$themes_dir/Hyprstyle.tmTheme"
+
+    log_info "Updating bat theme..."
+
+    # Create themes directory if it doesn't exist
+    if [ ! -d "$themes_dir" ]; then
+        mkdir -p "$themes_dir" || {
+            log_error "Failed to create bat themes directory: $themes_dir"
+            return 1
+        }
+    fi
+
+    apply_template "$template_dir/bat.theme" "$theme_file" || return 1
+
+    log_info "Updated: $theme_file"
+
+    # Rebuild bat cache to register new theme
+    if command -v bat &>/dev/null; then
+        log_info "Rebuilding bat theme cache..."
+        bat cache --build >/dev/null 2>&1 || log_warn "Failed to rebuild bat cache"
+    fi
+
+    return 0
+}
+
 # Update all application configurations
 update_all_configs() {
     local template_dir="$1"
@@ -257,6 +286,7 @@ update_all_configs() {
     update_wofi "$template_dir" || log_warn "Failed to update Wofi"
     update_nvim "$template_dir" || log_warn "Failed to update Neovim"
     update_hyprlock "$template_dir" || log_warn "Failed to update Hyprlock"
+    update_bat "$template_dir" || log_warn "Failed to update bat theme"
 
     log_info "Configuration update complete"
     return 0

@@ -117,6 +117,18 @@ window#waybar > box {
   color: ${PRIMARY};
 }
 
+#network {
+  color: ${PRIMARY};
+}
+
+#network.disconnected {
+  color: ${WARNING};
+}
+
+#network.disabled {
+  color: ${ERROR};
+}
+
 #battery {
   color: ${SUCCESS};
 }

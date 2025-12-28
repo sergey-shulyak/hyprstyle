@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name</key>
+	<string>Hyprstyle</string>
+	<key>author</key>
+	<string>hyprstyle</string>
+	<key>colorSpaceName</key>
+	<string>sRGB</string>
+	<key>uuid</key>
+	<string>hyprstyle-dynamic-theme</string>
+	<key>settings</key>
+	<array>
+		<!-- Global editor settings -->
+		<dict>
+			<key>settings</key>
+			<dict>
+				<key>background</key>
+				<string>${BG}</string>
+				<key>caret</key>
+				<string>${TEXT}</string>
+				<key>foreground</key>
+				<string>${TEXT}</string>
+				<key>lineHighlight</key>
+				<string>${BG_LIGHT}</string>
+				<key>selection</key>
+				<string>${SECONDARY}</string>
+				<key>gutter</key>
+				<string>${BG}</string>
+				<key>gutterForeground</key>
+				<string>${BG_LIGHT}</string>
+			</dict>
+		</dict>
+		<!-- Comments -->
+		<dict>
+			<key>name</key>
+			<string>Comment</string>
+			<key>scope</key>
+			<string>comment</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>${BG_LIGHT}</string>
+				<key>fontStyle</key>
+				<string>italic</string>
+			</dict>
+		</dict>
+		<!-- Strings -->
+		<dict>
+			<key>name</key>
+			<string>String</string>
+			<key>scope</key>
+			<string>string</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>${SUCCESS}</string>
+			</dict>
+		</dict>
+		<!-- Numbers -->
+		<dict>
+			<key>name</key>
+			<string>Number</string>
+			<key>scope</key>
+			<string>constant.numeric</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>${WARNING}</string>
+			</dict>
+		</dict>
+		<!-- Keywords -->
+		<dict>
+			<key>name</key>
+			<string>Keyword</string>
+			<key>scope</key>
+			<string>keyword</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>${PRIMARY}</string>
+				<key>fontStyle</key>
+				<string>bold</string>
+			</dict>
+		</dict>
+		<!-- Functions and variables -->
+		<dict>
+			<key>name</key>
+			<string>Function</string>
+			<key>scope</key>
+			<string>entity.name.function</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>${ACCENT}</string>
+			</dict>
+		</dict>
+		<!-- Operators -->
+		<dict>
+			<key>name</key>
+			<string>Operator</string>
+			<key>scope</key>
+			<string>keyword.operator</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>${TEXT}</string>
+			</dict>
+		</dict>
+		<!-- Error highlighting -->
+		<dict>
+			<key>name</key>
+			<string>Invalid</string>
+			<key>scope</key>
+			<string>invalid</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>${ERROR}</string>
+				<key>background</key>
+				<string>${BG}</string>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>

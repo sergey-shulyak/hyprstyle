@@ -118,6 +118,7 @@ validate_setup() {
         "waybar.style.css"
         "wofi.style.css"
         "nvim.colors.lua"
+        "bat.theme"
     )
 
     for template in "${required_templates[@]}"; do
