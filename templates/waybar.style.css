@@ -16,7 +16,7 @@ window#waybar {
 
 window#waybar > box {
   margin: 0;
-  padding: 8px;
+  padding: 6px 10px;
 }
 
 #workspaces {
@@ -26,7 +26,7 @@ window#waybar > box {
 }
 
 #custom-arch-menu {
-  padding: 4px 8px;
+  padding: 6px 10px;
   margin: 0 4px;
   margin-right: 20px;
   border-radius: 10px;
@@ -44,13 +44,13 @@ window#waybar > box {
 }
 
 #workspaces button {
-  padding: 4px 8px;
+  padding: 6px 10px;
   margin: 0 4px;
   border-radius: 10px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
   color: ${PRIMARY};
   font-weight: bold;
-  font-size: 12pt;
+  font-size: 13pt;
   transition: all 0.3s ease;
   min-width: 50px;
 }
@@ -68,12 +68,12 @@ window#waybar > box {
 }
 
 #clock {
-  padding: 4px 8px;
+  padding: 6px 10px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
   border-radius: 10px;
   color: ${PRIMARY};
   font-weight: bold;
-  font-size: 12pt;
+  font-size: 13pt;
   min-width: 120px;
   transition: all 0.3s ease;
 }
@@ -92,20 +92,20 @@ window#waybar > box {
 #network,
 #battery,
 #tray {
-  padding: 4px 8px;
+  padding: 6px 10px;
   margin: 0 4px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
   border-radius: 10px;
   color: ${TEXT};
   min-width: 40px;
-  font-size: 12pt;
+  font-size: 13pt;
   font-weight: bold;
   transition: all 0.3s ease;
 }
 
 #language {
   color: ${SECONDARY};
-  font-size: 12pt;
+  font-size: 13pt;
 }
 
 #cpu {
