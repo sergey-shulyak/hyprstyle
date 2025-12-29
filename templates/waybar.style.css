@@ -22,17 +22,20 @@ window#waybar > box {
 #workspaces {
   padding: 0;
   margin: 0;
+  margin-right: 20px;
 }
 
 #custom-arch-menu {
-  padding: 6px 12px;
+  padding: 4px 8px;
   margin: 0 4px;
+  margin-right: 20px;
   border-radius: 10px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
   color: ${PRIMARY};
   font-weight: bold;
   font-size: 16pt;
   transition: all 0.3s ease;
+  min-width: 50px;
 }
 
 #custom-arch-menu:hover {
@@ -49,6 +52,7 @@ window#waybar > box {
   font-weight: bold;
   font-size: 12pt;
   transition: all 0.3s ease;
+  min-width: 50px;
 }
 
 #workspaces button:hover {
@@ -59,6 +63,8 @@ window#waybar > box {
 #workspaces button.active {
   background-color: ${ACCENT};
   color: ${BG};
+  min-width: 70px;
+  transition: all 0.3s ease;
 }
 
 #clock {
