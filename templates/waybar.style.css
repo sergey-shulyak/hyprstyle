@@ -22,13 +22,13 @@ window#waybar > box {
 #workspaces {
   padding: 0;
   margin: 0;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 #custom-arch-menu {
   padding: 6px 10px;
   margin: 0 4px;
-  margin-right: 20px;
+  margin-right: 10px;
   border-radius: 10px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
   color: ${PRIMARY};
@@ -50,7 +50,7 @@ window#waybar > box {
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
   color: ${PRIMARY};
   font-weight: bold;
-  font-size: 13pt;
+  font-size: 12pt;
   transition: all 0.3s ease;
   min-width: 50px;
 }
@@ -73,7 +73,7 @@ window#waybar > box {
   border-radius: 10px;
   color: ${PRIMARY};
   font-weight: bold;
-  font-size: 13pt;
+  font-size: 12pt;
   min-width: 120px;
   transition: all 0.3s ease;
 }
@@ -98,14 +98,14 @@ window#waybar > box {
   border-radius: 10px;
   color: ${TEXT};
   min-width: 40px;
-  font-size: 13pt;
+  font-size: 12pt;
   font-weight: bold;
   transition: all 0.3s ease;
 }
 
 #language {
   color: ${SECONDARY};
-  font-size: 13pt;
+  font-size: 12pt;
 }
 
 #cpu {
