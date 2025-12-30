@@ -374,29 +374,42 @@ set_wallpaper() {
         return 0
     fi
 
-    # Check if hyprpaper is available
-    if ! command -v hyprpaper &>/dev/null; then
-        log_warn "hyprpaper not found, skipping wallpaper setting"
+    # Check if hyprctl is available
+    if ! command -v hyprctl &>/dev/null; then
+        log_warn "hyprctl not found, skipping wallpaper setting"
         return 0
     fi
 
-    log_info "Setting wallpaper with hyprpaper..."
+    log_info "Setting wallpaper with hyprctl..."
 
     # Create hyprpaper config
     local hyprpaper_config="$HOME/.config/hypr/hyprpaper.conf"
 
-    # Generate hyprpaper config
+    # Get primary monitor from hyprctl
+    local monitor=$(hyprctl monitors -j | python3 -c "import sys, json; data = json.load(sys.stdin); print(data[0]['name'])" 2>/dev/null || echo "")
+
+    if [ -z "$monitor" ]; then
+        log_warn "Could not detect monitor, skipping wallpaper setting"
+        return 0
+    fi
+
+    # Generate hyprpaper config with correct format
     {
-        echo "preload = $image_path"
-        echo "wallpaper = ,$image_path"
+        echo "wallpaper {"
+        echo "    monitor ="
+        echo "    path = $image_path"
+        echo "    fit_mode = cover"
+        echo "}"
     } > "$hyprpaper_config"
 
     log_info "Created hyprpaper config at $hyprpaper_config"
 
-    # Restart hyprpaper to apply new config
-    pkill hyprpaper 2>/dev/null || true
-    sleep 0.5
-    hyprpaper >/dev/null 2>&1 &
+    # Set wallpaper using hyprctl with new syntax
+    if hyprctl hyprpaper wallpaper "$monitor,$image_path,cover" 2>/dev/null; then
+        log_info "Wallpaper set successfully"
+    else
+        log_warn "Failed to set wallpaper with hyprctl, but config was created"
+    fi
 
     return 0
 }

@@ -82,6 +82,7 @@ window#waybar > box {
 #language,
 #cpu,
 #memory,
+#disk,
 #custom-network-speed,
 #temperature,
 #custom-cpu-temp,
@@ -114,6 +115,18 @@ window#waybar > box {
 
 #memory {
   color: ${PRIMARY};
+}
+
+#disk {
+  color: ${PRIMARY};
+}
+
+#disk.warning {
+  color: ${WARNING};
+}
+
+#disk.critical {
+  color: ${ERROR};
 }
 
 #custom-network-speed {
@@ -193,6 +206,7 @@ window#waybar > box {
 #clock:hover,
 #cpu:hover,
 #memory:hover,
+#disk:hover,
 #custom-network-speed:hover,
 #temperature:hover,
 #custom-cpu-temp:hover,
