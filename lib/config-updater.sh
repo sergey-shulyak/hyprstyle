@@ -54,15 +54,30 @@ apply_template() {
 
     log_info "Applying template: $(basename "$template_file")"
 
-    # Use sed for Hyprland templates (uses @@ format), envsubst for others (uses ${} format)
-    if [[ "$template_file" == *"hyprland"* ]] || [[ "$template_file" == *"hyprlock"* ]]; then
-        # Use sed to replace @@VARNAME@@ with environment variable values
-        sed_cmd="cat \"$template_file\""
-        for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK BUTTON_BG PRIMARY_RGBA SECONDARY_RGBA ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA BG_LIGHT_RGB BUTTON_BG_RGB ACCENT_RGB TEXT_RGB ERROR_RGB SUCCESS_RGB WARNING_RGB; do
-            value=$(eval echo \$${var})
-            sed_cmd="$sed_cmd | sed \"s|@@${var}@@|${value}|g\""
-        done
-        eval "$sed_cmd" > "$temp_file"
+    # Use sed for Hyprland and Ly templates, envsubst for others
+    if [[ "$template_file" == *"hyprland"* ]] || [[ "$template_file" == *"hyprlock"* ]] || [[ "$template_file" == *"ly.config"* ]]; then
+        # For ly config, we need to strip the # from hex colors before substitution
+        if [[ "$template_file" == *"ly.config"* ]]; then
+            # Create sed script to handle hex colors by stripping # symbol
+            sed_cmd="cat \"$template_file\""
+            for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK BUTTON_BG PRIMARY_RGBA SECONDARY_RGBA ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA BG_LIGHT_RGB BUTTON_BG_RGB ACCENT_RGB TEXT_RGB ERROR_RGB SUCCESS_RGB WARNING_RGB; do
+                value=$(eval echo \$${var})
+                # Strip # from hex colors for ly format (0xRRGGBB)
+                value_stripped="${value#\#}"
+                # Escape special sed characters in the value
+                value_escaped=$(printf '%s\n' "$value_stripped" | sed -e 's/[\/&]/\\&/g')
+                sed_cmd="$sed_cmd | sed \"s/\\\${${var}}/${value_escaped}/g\""
+            done
+            eval "$sed_cmd" > "$temp_file"
+        else
+            # Use sed to replace @@VARNAME@@ with environment variable values (Hyprland/Hyprlock)
+            sed_cmd="cat \"$template_file\""
+            for var in PRIMARY SECONDARY ACCENT BG TEXT ERROR SUCCESS WARNING BG_LIGHT BG_DARK BUTTON_BG PRIMARY_RGBA SECONDARY_RGBA ACCENT_RGBA BG_LIGHT_RGBA BG_DARK_RGBA BG_LIGHT_RGB BUTTON_BG_RGB ACCENT_RGB TEXT_RGB ERROR_RGB SUCCESS_RGB WARNING_RGB; do
+                value=$(eval echo \$${var})
+                sed_cmd="$sed_cmd | sed \"s|@@${var}@@|${value}|g\""
+            done
+            eval "$sed_cmd" > "$temp_file"
+        fi
     else
         # Use envsubst for ${VARNAME} format
         envsubst < "$template_file" > "$temp_file"
@@ -273,6 +288,49 @@ update_bat() {
     return 0
 }
 
+# Update Ly login manager configuration
+update_ly() {
+    local template_dir="$1"
+    local config_file="/etc/ly/config.ini"
+
+    log_info "Updating Ly login manager configuration..."
+
+    # Create temporary file with new config
+    local temp_file=$(mktemp)
+    apply_template "$template_dir/ly.config.ini" "$temp_file" || return 1
+
+    # Check if we have write permissions to ly config
+    if [ ! -w "$(dirname "$config_file")" ]; then
+        log_warn "Ly config directory requires root access"
+
+        # Prompt for sudo
+        printf "%b\n" "${YELLOW}[SUDO]${NC} Password required to update Ly config:" >&2
+
+        if sudo cp "$temp_file" "$config_file"; then
+            log_info "Updated: $config_file (via sudo)"
+            rm -f "$temp_file"
+            return 0
+        else
+            log_error "Failed to update Ly config with sudo"
+            log_warn "You can manually apply with: sudo cp $temp_file $config_file"
+            rm -f "$temp_file"
+            return 1
+        fi
+    fi
+
+    # Copy to ly config (no sudo needed)
+    if cp "$temp_file" "$config_file"; then
+        log_info "Updated: $config_file"
+        rm -f "$temp_file"
+        return 0
+    else
+        log_error "Failed to update Ly config"
+        log_warn "You can manually apply with: sudo cp $temp_file $config_file"
+        rm -f "$temp_file"
+        return 1
+    fi
+}
+
 # Update all application configurations
 update_all_configs() {
     local template_dir="$1"
@@ -287,6 +345,7 @@ update_all_configs() {
     update_nvim "$template_dir" || log_warn "Failed to update Neovim"
     update_hyprlock "$template_dir" || log_warn "Failed to update Hyprlock"
     update_bat "$template_dir" || log_warn "Failed to update bat theme"
+    update_ly "$template_dir" || log_warn "Failed to update Ly login manager"
 
     log_info "Configuration update complete"
     return 0

@@ -43,6 +43,7 @@ backup_configs() {
         "$HOME/.config/mako/config"
         "$HOME/.config/waybar/style.css"
         "$HOME/.config/wofi/style.css"
+        "/etc/ly/config.ini"
     )
 
     local backed_up=0
@@ -75,17 +76,57 @@ restore_backup() {
 
     log_info "Restoring from backup: $backup_name"
 
+    local restore_failed=0
+
     # Find all backed up files and restore them
-    find "$backup_path" -type f | while read -r file; do
+    while IFS= read -r file; do
         local rel_path="${file#$backup_path/}"
         local target="$HOME/$rel_path"
 
-        # Create parent directory if needed
-        mkdir -p "$(dirname "$target")"
+        # Check if this is a system file (/etc/...) that should be restored to root
+        if [[ "$rel_path" == "etc/"* ]]; then
+            # Restore to /etc/... instead of $HOME/etc/...
+            target="/${rel_path}"
+        fi
 
-        cp "$file" "$target"
-        log_info "Restored: $rel_path"
-    done
+        # Check if we need sudo for this file
+        if [[ "$target" == "/etc/"* ]] && [ ! -w "$(dirname "$target")" ]; then
+            log_warn "File requires sudo to restore: $rel_path"
+            printf "%b\n" "${YELLOW}[SUDO]${NC} Password required to restore system files:" >&2
+
+            # Create parent directory if needed (with sudo if necessary)
+            local parent_dir="$(dirname "$target")"
+            if [ ! -d "$parent_dir" ]; then
+                if ! sudo mkdir -p "$parent_dir"; then
+                    log_error "Failed to create directory: $parent_dir"
+                    restore_failed=1
+                    continue
+                fi
+            fi
+
+            # Copy with sudo
+            if sudo cp "$file" "$target"; then
+                log_info "Restored: $rel_path (via sudo)"
+            else
+                log_error "Failed to restore: $rel_path"
+                restore_failed=1
+            fi
+        else
+            # Regular restore (user permissions)
+            mkdir -p "$(dirname "$target")" 2>/dev/null || true
+            if cp "$file" "$target"; then
+                log_info "Restored: $rel_path"
+            else
+                log_error "Failed to restore: $rel_path"
+                restore_failed=1
+            fi
+        fi
+    done < <(find "$backup_path" -type f)
+
+    if [ $restore_failed -ne 0 ]; then
+        log_error "Some files failed to restore"
+        return 1
+    fi
 
     log_info "Restore complete"
     return 0

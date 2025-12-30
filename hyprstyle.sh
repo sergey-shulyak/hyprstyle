@@ -119,6 +119,7 @@ validate_setup() {
         "wofi.style.css"
         "nvim.colors.lua"
         "bat.theme"
+        "ly.config.ini"
     )
 
     for template in "${required_templates[@]}"; do
