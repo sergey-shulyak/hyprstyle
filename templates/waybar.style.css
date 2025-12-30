@@ -1,7 +1,7 @@
 * {
   border: none;
   border-radius: 0;
-  font-family: "JetBrains Mono", "Noto Color Emoji", monospace;
+  font-family: "JetBrains Mono";
   font-size: 12pt;
   min-height: 0;
   margin: 0;
@@ -219,7 +219,7 @@ tooltip {
   border-radius: 10px;
   padding: 16px;
   color: ${TEXT};
-  font-family: "JetBrains Mono", "Noto Color Emoji", monospace;
+  font-family: "JetBrains Mono";
   font-size: 12pt;
   font-weight: bold;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -232,7 +232,7 @@ menu {
   border-radius: 8px;
   padding: 8px 0;
   color: ${TEXT};
-  font-family: "JetBrains Mono", "Noto Color Emoji", monospace;
+  font-family: "JetBrains Mono";
   font-size: 11pt;
 }
 
