@@ -62,8 +62,10 @@ window#waybar > box {
 
 #workspaces button.active,
 #workspaces button.active:hover {
-  background-color: ${UI_ACCENT};
-  color: #1a1a1a;
+  background-color: rgba(${BUTTON_BG_RGB}, 0.5);
+  color: ${UI_ACCENT};
+  font-weight: bold;
+  border: 2px solid ${UI_ACCENT};
   min-width: 70px;
   transition: all 0.3s ease;
 }
@@ -106,7 +108,7 @@ window#waybar > box {
 }
 
 #language {
-  color: ${SECONDARY};
+  color: ${UI_ACCENT};
   font-size: 12pt;
 }
 
