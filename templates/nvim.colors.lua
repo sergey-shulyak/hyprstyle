@@ -7,22 +7,24 @@ local M = {}
 function M.setup()
   -- Terminal colors (ANSI color codes 0-15)
   -- Used by terminal UI and colorschemes that respect terminal colors
-  vim.g.terminal_color_0 = '${BG_DARK}'
-  vim.g.terminal_color_8 = '${BG}'
-  vim.g.terminal_color_1 = '${ERROR}'
-  vim.g.terminal_color_9 = '${ERROR}'
-  vim.g.terminal_color_2 = '${SUCCESS}'
-  vim.g.terminal_color_10 = '${SUCCESS}'
-  vim.g.terminal_color_3 = '${WARNING}'
-  vim.g.terminal_color_11 = '${WARNING}'
-  vim.g.terminal_color_4 = '${PRIMARY}'
-  vim.g.terminal_color_12 = '${PRIMARY}'
-  vim.g.terminal_color_5 = '${ACCENT}'
-  vim.g.terminal_color_13 = '${ACCENT}'
-  vim.g.terminal_color_6 = '${SECONDARY}'
-  vim.g.terminal_color_14 = '${SECONDARY}'
-  vim.g.terminal_color_7 = '${TEXT}'
-  vim.g.terminal_color_15 = '${TEXT}'
+  -- Normal colors (0-7)
+  vim.g.terminal_color_0 = '${BG_DARK}'      -- Black
+  vim.g.terminal_color_1 = '${ERROR}'        -- Red
+  vim.g.terminal_color_2 = '${SUCCESS}'      -- Green
+  vim.g.terminal_color_3 = '${WARNING}'      -- Yellow
+  vim.g.terminal_color_4 = '${PRIMARY}'      -- Blue
+  vim.g.terminal_color_5 = '${ACCENT}'       -- Magenta
+  vim.g.terminal_color_6 = '${SECONDARY}'    -- Cyan
+  vim.g.terminal_color_7 = '${WHITE_DIM}'    -- White (dim)
+  -- Bright colors (8-15)
+  vim.g.terminal_color_8 = '${BG_LIGHT}'     -- Bright Black (gray)
+  vim.g.terminal_color_9 = '${ERROR_BRIGHT}' -- Bright Red
+  vim.g.terminal_color_10 = '${SUCCESS_BRIGHT}' -- Bright Green
+  vim.g.terminal_color_11 = '${WARNING_BRIGHT}' -- Bright Yellow
+  vim.g.terminal_color_12 = '${PRIMARY_BRIGHT}' -- Bright Blue
+  vim.g.terminal_color_13 = '${ACCENT_BRIGHT}'  -- Bright Magenta
+  vim.g.terminal_color_14 = '${SECONDARY_BRIGHT}' -- Bright Cyan
+  vim.g.terminal_color_15 = '${TEXT}'        -- Bright White
 
   -- Ensure true color support is enabled
   vim.opt.termguicolors = true

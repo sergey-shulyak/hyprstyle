@@ -4,7 +4,7 @@
 window {
     background-color: rgba(${BUTTON_BG_RGB}, 0.9);
     color: ${TEXT};
-    border: 2px solid ${ACCENT};
+    border: 2px solid ${UI_ACCENT};
     border-radius: 10px;
     font-family: "JetBrains Mono";
     font-size: 12pt;
@@ -23,7 +23,7 @@ window {
 
 #input:focus {
     background-color: rgba(${BUTTON_BG_RGB}, 0.5);
-    border: 2px solid ${PRIMARY};
+    border: 2px solid ${UI_ACCENT};
     outline: none;
 }
 
@@ -39,12 +39,13 @@ window {
 }
 
 #entry:selected {
-    background-color: ${ACCENT};
-    color: ${BG};
+    background-color: ${UI_ACCENT};
+    color: #1a1a1a;
 }
 
 #entry:hover {
-    background-color: rgba(${BUTTON_BG_RGB}, 0.3);
+    background-color: rgba(${UI_ACCENT_RGB}, 0.7);
+    color: #1a1a1a;
 }
 
 #scroll {

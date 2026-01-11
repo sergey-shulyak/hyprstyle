@@ -31,7 +31,7 @@ window#waybar > box {
   margin-right: 10px;
   border-radius: 10px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
   font-weight: bold;
   font-size: 16pt;
   transition: all 0.3s ease;
@@ -48,7 +48,7 @@ window#waybar > box {
   margin: 0 4px;
   border-radius: 10px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
   font-weight: bold;
   font-size: 12pt;
   transition: all 0.3s ease;
@@ -60,9 +60,10 @@ window#waybar > box {
   color: ${TEXT};
 }
 
-#workspaces button.active {
-  background-color: ${ACCENT};
-  color: ${BG};
+#workspaces button.active,
+#workspaces button.active:hover {
+  background-color: ${UI_ACCENT};
+  color: #1a1a1a;
   min-width: 70px;
   transition: all 0.3s ease;
 }
@@ -71,7 +72,7 @@ window#waybar > box {
   padding: 6px 10px;
   background-color: rgba(${BUTTON_BG_RGB}, 0.5);
   border-radius: 10px;
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
   font-weight: bold;
   font-size: 12pt;
   min-width: 120px;
@@ -110,15 +111,15 @@ window#waybar > box {
 }
 
 #cpu {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #memory {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #disk {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #disk.warning {
@@ -130,11 +131,11 @@ window#waybar > box {
 }
 
 #custom-network-speed {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #temperature {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #temperature.critical {
@@ -143,7 +144,7 @@ window#waybar > box {
 }
 
 #custom-cpu-temp {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #custom-cpu-temp.critical {
@@ -152,23 +153,23 @@ window#waybar > box {
 }
 
 #custom-gpu-temp {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #bluetooth {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #pulseaudio {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #backlight {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #network {
-  color: ${PRIMARY};
+  color: ${UI_ACCENT};
 }
 
 #network.disconnected {
@@ -229,7 +230,7 @@ window#waybar > box {
 /* Tooltip styles */
 tooltip {
   background-color: rgba(${BUTTON_BG_RGB}, 0.95);
-  border: 1px solid ${ACCENT};
+  border: 1px solid ${UI_ACCENT};
   border-radius: 10px;
   padding: 16px;
   color: ${TEXT};
@@ -242,7 +243,7 @@ tooltip {
 /* Context menu styling (tray right-click menus) */
 menu {
   background-color: rgba(${BUTTON_BG_RGB}, 0.95);
-  border: 1px solid ${ACCENT};
+  border: 1px solid ${UI_ACCENT};
   border-radius: 8px;
   padding: 8px 0;
   color: ${TEXT};
@@ -258,8 +259,8 @@ menuitem {
 }
 
 menuitem:hover {
-  background-color: rgba(${ACCENT_RGB}, 0.3);
-  color: ${PRIMARY};
+  background-color: rgba(${UI_ACCENT_RGB}, 0.3);
+  color: ${UI_ACCENT};
 }
 
 menuitem:disabled {
